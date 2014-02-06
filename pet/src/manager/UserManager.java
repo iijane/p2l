@@ -9,6 +9,7 @@ import java.sql.Statement;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
@@ -34,24 +35,53 @@ public class UserManager {
 		try{
 			connection = ConnectionManager.getConnection();
 
-			String retrieveUserSQL = "select * from user where email = '" + email + "';";	
+			String retrieveUserSQL = "select * from \"user\" where email = '" + email + "';";	
 			queryPstmt = connection.prepareStatement(retrieveUserSQL);
 
 			ResultSet rs = queryPstmt.executeQuery();
 
 			while(rs.next()){
-				userJsonObj.addProperty("userID", rs.getInt("userID"));
-				userJsonObj.addProperty("firstName", rs.getString("firstName"));
-				userJsonObj.addProperty("lastName", rs.getString("lastName"));
+				userJsonObj.addProperty("user_id", rs.getInt("user_id"));
+				userJsonObj.addProperty("first_name", rs.getString("first_name"));
+				userJsonObj.addProperty("last_name", rs.getString("last_name"));
 				userJsonObj.addProperty("email", rs.getString("email"));
 				userJsonObj.addProperty("password", rs.getString("password"));
 				userJsonObj.addProperty("dob", rs.getString("dob"));
 			}
 		}catch (SQLException ex) {
 			userJsonObj.addProperty("errorMsg", "There has been a problem accessing the database. Please try again later");
+			userJsonObj.addProperty("error",  ex.getMessage());
 		} finally {
 			ConnectionManager.close(connection, queryPstmt, rs);
 		}
 		return userJsonObj.toString();
 	}
+	
+	@GET
+	@Path("/retrieveUserIdByEmail")
+	@Produces(MediaType.APPLICATION_JSON)
+	public String retrieveUserIdByEmail(@QueryParam("email") String email){
+		JsonObject userJsonObj = new JsonObject();
+		
+		try{
+			connection = ConnectionManager.getConnection();
+
+			String retrieveUserSQL = "select user_id from \"user\" where email = '" + email + "';";	
+			queryPstmt = connection.prepareStatement(retrieveUserSQL);
+
+			ResultSet rs = queryPstmt.executeQuery();
+			
+			if(rs!=null && rs.next()){
+				userJsonObj.addProperty("user_id", rs.getInt("user_id"));
+	        }
+			
+		}catch (SQLException ex) {
+			userJsonObj.addProperty("errorMsg", "There has been a problem accessing the database. Please try again later");
+			userJsonObj.addProperty("error",  ex.getMessage());
+		} finally {
+			ConnectionManager.close(connection, queryPstmt, rs);
+		}
+		return userJsonObj.toString();
+	}
+	
 }

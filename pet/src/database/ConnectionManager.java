@@ -4,6 +4,10 @@ import java.sql.*;
 import java.util.Properties;
 import java.io.InputStream;
 
+import javax.ws.rs.core.UriBuilder;
+
+import java.net.URI;
+
 /**
  * A class that manages connections to the database. It also
  * has a utility method that close connections, statements and
@@ -14,7 +18,9 @@ public class ConnectionManager {
     private static String JDBC_URL = "jdbc.url";
     private static String JDBC_USER = "jdbc.user";
     private static String JDBC_PASSWORD = "jdbc.password";
+    private static String WEBSERVICE_URL = "webservice.url";
     private static Properties props = new Properties();
+    private static Properties web_props = new Properties();
 
     static {
         try {
@@ -25,6 +31,12 @@ public class ConnectionManager {
         }
         try {
             Class.forName(props.getProperty(JDBC_DRIVER)).newInstance();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            InputStream is = ConnectionManager.class.getResourceAsStream("webservice.properties");
+            web_props.load(is);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -73,6 +85,10 @@ public class ConnectionManager {
         }
     }
 
+    public static URI getBaseURI() {
+	    return UriBuilder.fromUri(web_props.getProperty(WEBSERVICE_URL)).build();
+	  }
+    
     public static void main(String[] args) throws Exception {
         System.out.println(ConnectionManager.getConnection());
 
