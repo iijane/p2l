@@ -33,7 +33,7 @@ public class LoginServlet extends HttpServlet {
 		Client client = Client.create(config);
 		WebResource service = client.resource(ConnectionManager.getBaseURI());
 
-		String jsonString = service.path("rest").path("controller").path("LoginController").path("login").queryParam("email", emailInput).queryParam("password", passwordInput).accept(MediaType.APPLICATION_JSON).get(String.class);
+		String jsonString = service.path("rest").path("LoginController").path("login").queryParam("email", emailInput).queryParam("password", passwordInput).accept(MediaType.APPLICATION_JSON).get(String.class);
 		JsonObject jsonObject = new Gson().fromJson(jsonString, JsonObject.class);
 
 		if(jsonObject.has("errorMsg")){
@@ -44,10 +44,11 @@ public class LoginServlet extends HttpServlet {
 			return;
 		} else {
 			HttpSession session = request.getSession();
-			session.setAttribute("userId", jsonObject.get("user_id").getAsString());
-			session.setAttribute("firstName", jsonObject.get("first_name").getAsString());
+			session.setAttribute("userId", jsonObject.get("userId").getAsString());
+			session.setAttribute("firstName", jsonObject.get("firstName").getAsString());
 			response.sendRedirect("main.jsp");
 		}
+		
 
 	}
 
