@@ -7,8 +7,8 @@
 <title>Insert title here</title>
 </head>
 <body>
-<form method="post" action="">
-Username:<input type="text" name="username" size="20" ><br>
+<form method="post" action="./login" id="loginForm">
+Email:<input type="text" name="username" size="20" ><br>
 Password:<input type="password" name="password" size="20" ><br>
 <input type="submit" value="Login" />
 <input type="reset" value="Reset" />

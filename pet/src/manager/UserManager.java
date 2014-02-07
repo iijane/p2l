@@ -26,7 +26,7 @@ public class UserManager {
 	private PreparedStatement queryPstmt = null;
 	
 	@GET
-	@Path("/retrieveUserByEmail")
+	@Path("/retrieveUserValidationByEmail")
 	@Produces(MediaType.APPLICATION_JSON)
 	public String retrieveUserByEmail(@QueryParam("email") String email){
 		 
@@ -43,10 +43,8 @@ public class UserManager {
 			while(rs.next()){
 				userJsonObj.addProperty("user_id", rs.getInt("user_id"));
 				userJsonObj.addProperty("first_name", rs.getString("first_name"));
-				userJsonObj.addProperty("last_name", rs.getString("last_name"));
 				userJsonObj.addProperty("email", rs.getString("email"));
 				userJsonObj.addProperty("password", rs.getString("password"));
-				userJsonObj.addProperty("dob", rs.getString("dob"));
 			}
 		}catch (SQLException ex) {
 			userJsonObj.addProperty("errorMsg", "There has been a problem accessing the database. Please try again later");

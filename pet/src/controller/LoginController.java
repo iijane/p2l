@@ -1,7 +1,7 @@
 package controller;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 
 import manager.UserManager;
 
@@ -26,12 +26,14 @@ public class LoginController {
 		if(email.trim().isEmpty() || password.trim().isEmpty()){
 			resultJsonObject.addProperty("errorMsg", "Please fill in all empty fields!");
 		}else{
-			String getUser = userManager.retrieveUserByEmail(email.trim());
-			JsonObject getUserJsonObj = new JsonParser().parse(getUser).getAsJsonObject();
+			String getUserJson = userManager.retrieveUserByEmail(email.trim());
+			JsonObject getUserJsonObj = new Gson().fromJson(getUserJson, JsonObject.class);
 			if(!getUserJsonObj.has("email")){
 				resultJsonObject.addProperty("errorMsg", "Sorry, your email has not been registered.");
 			}else if(password.equals(getUserJsonObj.get("password").getAsString())){
 				resultJsonObject.addProperty("successMsg", "Welcome to Petzlinked!");
+				resultJsonObject.addProperty("userId", getUserJsonObj.get("user_id").getAsString());
+				resultJsonObject.addProperty("firstName", getUserJsonObj.get("first_name").getAsString());
 			}else{
 				resultJsonObject.addProperty("errorMsg", "Sorry, the email and password does not match. Please try again!");
 			}
