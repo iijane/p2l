@@ -33,7 +33,10 @@ public class LoginServlet extends HttpServlet {
 		Client client = Client.create(config);
 		WebResource service = client.resource(ConnectionManager.getBaseURI());
 
-		String jsonString = service.path("rest").path("LoginController").path("login").queryParam("email", emailInput).queryParam("password", passwordInput).accept(MediaType.APPLICATION_JSON).get(String.class);
+		String jsonString = service.path("rest").path("LoginController").path("login")
+				.queryParam("email", emailInput).queryParam("password", passwordInput)
+				.accept(MediaType.APPLICATION_JSON).get(String.class);
+		
 		JsonObject jsonObject = new Gson().fromJson(jsonString, JsonObject.class);
 
 		if(jsonObject.has("errorMsg")){

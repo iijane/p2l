@@ -15,5 +15,14 @@ Password:<input type="password" name="password" size="20" ><br>
 </form>
 
 Yet Not Registered!! <a href="registration.jsp">Register Here</a>
+<%
+	String successMsg = (String) request.getParameter("regsuccess");
+
+	if(successMsg != null){
+		out.println("</br></br>You have successfully registered your account. An email had been sent to you to verify your account.");
+	}
+
+
+%>
 </body>
 </html>
