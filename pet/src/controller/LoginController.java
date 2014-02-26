@@ -123,6 +123,7 @@ public class LoginController {
 			inputJsonObject.addProperty("dobInput", dobInput);
 			inputJsonObject.addProperty("countriesInput", countriesInput);
 			inputJsonObject.addProperty("stateInput", stateInput);
+			inputJsonObject.addProperty("cityInput", cityInput);
 			inputJsonObject.addProperty("addressInput", addressInput);
 			inputJsonObject.addProperty("postalInput", postalInput);
 			inputJsonObject.addProperty("countrycodeInput", countrycodeInput);

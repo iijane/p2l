@@ -1,10 +1,63 @@
 <%@ page language="java" contentType="text/html; charset=ISO-8859-1"
 	pageEncoding="ISO-8859-1"%>
+<%@ page import="com.google.gson.*"%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <title>Registration</title>
+<link rel="stylesheet" href="assets/css/jquery-ui-1.10.4.custom.css">
+<script src="assets/js/jquery-1.11.0.js"></script>
+<script src="assets/js/jquery-ui-1.10.4.custom.js"></script>
+<%
+	JsonObject inputJsonObject = (JsonObject) request
+			.getAttribute("inputs");
+%>
+<script type="text/javascript">
+
+	function genderInput(){
+
+		var genderInputJS = "<%=inputJsonObject == null ? "" : inputJsonObject.get("genderInput").getAsString()%>";
+		document.getElementById(genderInputJS).checked= true;
+		
+		var countriesInputJS = "<%=inputJsonObject == null ? "" : inputJsonObject.get("countriesInput").getAsString()%>";
+		$('#countries').val(countriesInputJS);
+		
+		var countrycodeInputJS = "<%=inputJsonObject == null ? "" : inputJsonObject.get("countrycodeInput").getAsString()%>";
+		$('#countrycode').val(countrycodeInputJS);
+	
+	};
+		
+	$(document).ready(function() {
+		$('#postal').keydown(maskInputNumeric);
+		$('#mobile').keydown(maskInputNumeric);
+		$('#dob').datepicker();
+		genderInput();
+		
+	});
+
+	function maskInputNumeric() {
+		if (event.shiftKey == true) {
+			event.preventDefault();
+		}
+
+		if ((event.keyCode >= 48 && event.keyCode <= 57)
+				|| (event.keyCode >= 96 && event.keyCode <= 105)
+				|| event.keyCode == 8 || event.keyCode == 9
+				|| event.keyCode == 37 || event.keyCode == 39
+				|| event.keyCode == 46) {
+
+		} else {
+			event.preventDefault();
+		}
+
+		if ($(this).val().indexOf('.') !== -1 && event.keyCode == 190)
+			event.preventDefault();
+	};
+
+	
+
+</script>
 </head>
 <body>
 	<form method="post" action="./registration">
@@ -18,37 +71,39 @@
 				<tbody>
 					<tr>
 						<td>First Name</td>
-						<td><input type="text" name="fname" value="" /></td>
+						<td><input id="fname" type="text" name="fname" value='<%=inputJsonObject == null ? "" : inputJsonObject.get("firstNameInput")
+					.getAsString()%>'/></td>
 					</tr>
 					<tr>
 						<td>Last Name</td>
-						<td><input type="text" name="lname" value="" /></td>
+						<td><input id="lname" type="text" name="lname" value='<%=inputJsonObject == null ? "" : inputJsonObject.get("lastNameInput")
+					.getAsString()%>' /></td>
 					</tr>
 					<tr>
 						<td>Email <br />(Login User)
 						</td>
-						<td><input type="text" name="email" value="" /></td>
+						<td><input id="email" type="text" name="email" value='<%=inputJsonObject == null ? "" : inputJsonObject.get("emailInput").getAsString()%>' /></td>
 					</tr>
 					<tr>
 						<td>Password</td>
-						<td><input type="password" name="pass" value="" /></td>
+						<td><input id="pass" type="password" name="pass" value="" /></td>
 					</tr>
 					<tr>
 						<td>Re-Password</td>
-						<td><input type="password" name="rpass" value="" /></td>
+						<td><input id="rpass" type="password" name="rpass" value="" /></td>
 					</tr>
 					<tr>
 						<td>Gender</td>
-						<td><input type="radio" name="gender" value="M">Male
-							<input type="radio" name="gender" value="F">Female</td>
+						<td><input id="M" type="radio" name="gender" value="M">Male 
+						<input id="F" type="radio" name="gender" value="F">Female</td>
 					</tr>
 					<tr>
 						<td>Date of Birth</td>
-						<td><input type="date" name="dob"></td>
+						<td><input id="dob" type="text" name="dob" value='<%=inputJsonObject == null ? "" : inputJsonObject.get("dobInput").getAsString()%>' ></td>
 					</tr>
 					<tr>
 						<td>Country</td>
-						<td><select id="countries" name="countries">
+						<td><select id="countries" name="countries" >
 								<option value="Afghanistan">Afghanistan</option>
 								<option value="Åland Islands">Åland Islands</option>
 								<option value="Albania">Albania</option>
@@ -330,25 +385,23 @@
 					</tr>
 					<tr>
 						<td>State</td>
-						<td><input type="text" name="state" value="" /></td>
+						<td><input id="state" type="text" name="state" value='<%=inputJsonObject == null ? "" : inputJsonObject.get("stateInput").getAsString()%>' /></td>
 					</tr>
 					<tr>
 						<td>City</td>
-						<td><input type="text" name="city" value="" /></td>
+						<td><input id="city" type="text" name="city" value='<%=inputJsonObject == null ? "" : inputJsonObject.get("cityInput").getAsString()%>' /></td>
 					</tr>
 					<tr>
 						<td>Address</td>
-						<td><input type="text" name="address" value="" /></td>
+						<td><input id="address" type="text" name="address" value='<%=inputJsonObject == null ? "" : inputJsonObject.get("addressInput").getAsString()%>' /></td>
 					</tr>
 					<tr>
 						<td>Postal Code</td>
-						<td><input type="text" name="postal" value="" /></td>
+						<td><input id="postal" type="text" name="postal" value='<%=inputJsonObject == null ? "" : inputJsonObject.get("postalInput").getAsString()%>' /></td>
 					</tr>
 					<tr>
 						<td>Mobile Number</td>
-						<td><select name="countrycode">
-								<option value="44" selected>UK (+44)
-								<option value="1">USA (+1)
+						<td><select id="countrycode" name="countrycode">
 								<option value="213">Algeria (+213)
 								<option value="376">Andorra (+376)
 								<option value="244">Angola (+244)
@@ -520,7 +573,7 @@
 								<option value="381">Serbia (+381)
 								<option value="248">Seychelles (+248)
 								<option value="232">Sierra Leone (+232)
-								<option value="65">Singapore (+65)
+								<option value="65" >Singapore (+65)
 								<option value="421">Slovak Republic (+421)
 								<option value="386">Slovenia (+386)
 								<option value="677">Solomon Islands (+677)
@@ -548,10 +601,9 @@
 								<option value="7">Turkmenistan (+7)
 								<option value="993">Turkmenistan (+993)
 								<option value="1649">Turks &amp; Caicos Islands (+1649)
-								
 								<option value="688">Tuvalu (+688)
 								<option value="256">Uganda (+256)
-								<option value="44" selected>UK (+44)
+								<option value="44" >UK (+44)
 								<option value="380">Ukraine (+380)
 								<option value="971">United Arab Emirates (+971)
 								<option value="598">Uruguay (+598)
@@ -570,7 +622,7 @@
 								<option value="243">Zaire (+243)
 								<option value="260">Zambia (+260)
 								<option value="263">Zimbabwe (+263)
-						</select> <input type="text" name="mobile" value="" /></td>
+						</select> <input id="mobile" type="text" name="mobile" value='<%=inputJsonObject == null ? "" : inputJsonObject.get("mobileInput").getAsString()%>' /></td>
 					</tr>
 					<tr>
 
