@@ -12,7 +12,6 @@
 <%
 	JsonObject inputJsonObject = (JsonObject) request
 			.getAttribute("inputs");
-System.out.println(inputJsonObject);
 	String errorMsg = (String) request.getAttribute("errorMsg");
 %>
 <script type="text/javascript">
