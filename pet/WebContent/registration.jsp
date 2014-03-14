@@ -12,19 +12,26 @@
 <%
 	JsonObject inputJsonObject = (JsonObject) request
 			.getAttribute("inputs");
+System.out.println(inputJsonObject);
+	String errorMsg = (String) request.getAttribute("errorMsg");
 %>
 <script type="text/javascript">
 
-	function genderInput(){
-
-		var genderInputJS = "<%=inputJsonObject == null ? "" : inputJsonObject.get("genderInput").getAsString()%>";
-		document.getElementById(genderInputJS).checked= true;
+	function validateInput(){
 		
+		var genderInputJS = "<%=inputJsonObject == null ? "" : inputJsonObject.get("genderInput").getAsString()%>";
+		if(genderInputJS != "") {
+			document.getElementById(genderInputJS).checked= true;
+		}
+	
 		var countriesInputJS = "<%=inputJsonObject == null ? "" : inputJsonObject.get("countriesInput").getAsString()%>";
 		$('#countries').val(countriesInputJS);
-		
+				
 		var countrycodeInputJS = "<%=inputJsonObject == null ? "" : inputJsonObject.get("countrycodeInput").getAsString()%>";
 		$('#countrycode').val(countrycodeInputJS);
+		
+		var dobInputJS = "<%=inputJsonObject == null ? "" : inputJsonObject.get("dobInput").getAsString()%>";
+		$('#dob').val(dobInputJS);
 	
 	};
 		
@@ -32,8 +39,10 @@
 		$('#postal').keydown(maskInputNumeric);
 		$('#mobile').keydown(maskInputNumeric);
 		$('#dob').datepicker();
-		genderInput();
-		
+		$('#dob').datepicker( "option", "dateFormat", "dd/mm/yy" );
+		if(<%=inputJsonObject%> != null){
+			validateInput();
+		}
 	});
 
 	function maskInputNumeric() {
@@ -54,12 +63,15 @@
 		if ($(this).val().indexOf('.') !== -1 && event.keyCode == 190)
 			event.preventDefault();
 	};
-
-	
-
 </script>
 </head>
 <body>
+	<%
+		if(errorMsg != null){
+			out.println(errorMsg);
+		}
+	
+	%>
 	<form method="post" action="./registration">
 		<center>
 			<table border="1" width="30%" cellpadding="5">
@@ -99,7 +111,7 @@
 					</tr>
 					<tr>
 						<td>Date of Birth</td>
-						<td><input id="dob" type="text" name="dob" value='<%=inputJsonObject == null ? "" : inputJsonObject.get("dobInput").getAsString()%>' ></td>
+						<td><input id="dob" type="text" name="dob" /></td>
 					</tr>
 					<tr>
 						<td>Country</td>

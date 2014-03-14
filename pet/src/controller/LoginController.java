@@ -79,9 +79,7 @@ public class LoginController {
 		boolean success = true;
 		
 		JsonObject resultJsonObject = new JsonObject();
-		
-		
-		
+
 		if(firstNameInput.isEmpty() || lastNameInput.isEmpty() || emailInput.isEmpty() || passwordInput.isEmpty()
 				|| rPasswordInput.isEmpty() || dobInput.isEmpty() || countriesInput.isEmpty() || stateInput.isEmpty()
 				|| cityInput.isEmpty() || addressInput.isEmpty() || countrycodeInput.isEmpty() || mobileInput.isEmpty()){
@@ -93,7 +91,8 @@ public class LoginController {
 			if(getUserJsonObj.has("email")){
 				resultJsonObject.addProperty("errorMsg", "Sorry an account has been registered under this email.");
 				success = false;
-			}else if(passwordInput.equals("rPasswordInput")){
+			}else if(passwordInput.equals(rPasswordInput)){
+			
 				String regUserJson = writeUserManager.newUser(firstNameInput, lastNameInput, emailInput, passwordInput,
 						genderInput, dobInput, countriesInput, stateInput, cityInput,addressInput, postalInput, countrycodeInput, mobileInput);
 
@@ -105,7 +104,7 @@ public class LoginController {
 					resultJsonObject.addProperty("errorMsg", regUserJsonObj.get("errorMsg").getAsString());
 					success = false;
 				}
-			}else if(!passwordInput.equals("rPasswordInput")){
+			}else if(!passwordInput.equals(rPasswordInput)){
 				resultJsonObject.addProperty("errorMsg", "Your password does not match.");
 				success = false;
 			}else{
