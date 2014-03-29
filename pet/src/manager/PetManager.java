@@ -17,31 +17,60 @@ import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBElement;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 import database.ConnectionManager;
 
-@Path("/PetManager")
 public class PetManager {
 
-	private Connection connection = null;
-	// private Statement statement = null;
-	private ResultSet rs = null;
-	private PreparedStatement queryPstmt = null;
+	public String retrievePetsByUserId(String id, Connection connection) {
+		
+		JsonObject petsJsonObj = new JsonObject();
+		JsonArray pets = new JsonArray();
 
-	@GET
-	@Path("/retrievePetByUser")
-	@Produces(MediaType.APPLICATION_JSON)
-	public String retrievePetByUser(@QueryParam("email") String email) {
+		try {
 
+			String retrieveUserSQL = "SELECT * FROM pet WHERE user_id = ?;";
+			PreparedStatement queryPstmt = connection.prepareStatement(retrieveUserSQL);
+			queryPstmt.setString(1, id);
+
+			ResultSet rs = queryPstmt.executeQuery();
+
+			while (rs.next()) {
+				JsonObject petJsonObj = new JsonObject();
+				petJsonObj.addProperty("pet_id", rs.getInt("pet_id"));
+				petJsonObj.addProperty("user_id", rs.getInt("user_id"));
+				petJsonObj.addProperty("pet_name", rs.getString("pet_name"));
+				petJsonObj.addProperty("tag_id", rs.getString("tag_id"));
+				petJsonObj.addProperty("gender", rs.getString("gender"));
+				petJsonObj.addProperty("breed", rs.getString("breed"));
+				petJsonObj.addProperty("dob", rs.getString("dob"));
+				petJsonObj.addProperty("country", rs.getString("country"));
+				petJsonObj.addProperty("description",
+						rs.getString("description"));
+				pets.add(petJsonObj);
+			}
+			
+			petsJsonObj.addProperty("user_id", id);
+			petsJsonObj.add("pets", pets);
+		} catch (SQLException ex) {
+			petsJsonObj.addProperty("errorMsg",
+							"There has been a problem accessing the database. Please try again later");
+		}
+		
+		return petsJsonObj.toString();
+	}
+	
+	public String retrievePet(String user_id, String pet_id, Connection connection) {
+		
 		JsonObject petJsonObj = new JsonObject();
 
 		try {
-			connection = ConnectionManager.getConnection();
-
-			String retrieveUserSQL = "SELECT * FROM pet WHERE user_id = (SELECT user_id FROM \"user\" WHERE email = ?);";
-			queryPstmt = connection.prepareStatement(retrieveUserSQL);
-			queryPstmt.setString(1, email);
+			String retrieveUserSQL = "SELECT * FROM pet WHERE user_id = ? AND pet+id = ? ;";
+			PreparedStatement queryPstmt = connection.prepareStatement(retrieveUserSQL);
+			queryPstmt.setString(1, user_id);
+			queryPstmt.setString(2, pet_id);
 
 			ResultSet rs = queryPstmt.executeQuery();
 
@@ -57,53 +86,48 @@ public class PetManager {
 				petJsonObj.addProperty("description",
 						rs.getString("description"));
 			}
+			
 		} catch (SQLException ex) {
-			petJsonObj
-					.addProperty("errorMsg",
+			petJsonObj.addProperty("errorMsg",
 							"There has been a problem accessing the database. Please try again later");
-		} finally {
-			ConnectionManager.close(connection, queryPstmt, rs);
 		}
 		return petJsonObj.toString();
 	}
-
-	@PUT
-	@Consumes(MediaType.APPLICATION_JSON)
-	public void putPet(JAXBElement<JsonObject> ele) {
+	
+	public String newPet(String userId, String petName, String tagId, String gender,
+			String breed, String dob, String country, String description, Connection connection){
+		 
 		JsonObject res = new JsonObject();
 		
-		try {
-			JsonObject pet = ele.getValue();//new Gson().fromJson(jsonString, JsonObject.class);
+		try{
 			connection = ConnectionManager.getConnection();
 
 			String putPetSQL = "INSERT INTO pet(pet_id, user_id, pet_name, tag_id, gender, breed, dob, country, description "
-					+ "VALUES (DEFAULT, ?, ?, ?, ?, ?, ?, ?, ?);";
+					+ "VALUES (DEFAULT, ?, ?, ?, ?, ?, CAST(? AS DATE), ?, ?);";
 
-			queryPstmt = connection.prepareStatement(putPetSQL);
+			PreparedStatement queryPstmt = connection.prepareStatement(putPetSQL);
+			queryPstmt.setString(1, userId);
+			queryPstmt.setString(2, petName);
+			queryPstmt.setString(3, tagId);
+			queryPstmt.setString(4, gender);
+			queryPstmt.setString(5, breed);
+			queryPstmt.setString(6, dob);
+			queryPstmt.setString(7, country);
+			queryPstmt.setString(8, description);
 			
-			queryPstmt.setString(1, pet.get("user_id").getAsString());
-			queryPstmt.setString(2, pet.get("pet_name").getAsString());
-			queryPstmt.setString(3, pet.get("tag_id").getAsString());
-			queryPstmt.setString(4, pet.get("gender").getAsString());
-			queryPstmt.setString(5, pet.get("breed").getAsString());
-			queryPstmt.setString(5, pet.get("dob").getAsString());
-			queryPstmt.setString(5, pet.get("country").getAsString());
-			queryPstmt.setString(5, pet.get("description").getAsString());
-
 			int affectedRows = queryPstmt.executeUpdate();
 			
 			if (affectedRows == 1) {
-				res.addProperty("success", true);
+				res.addProperty("successMsg", true);
 			} else {
-				res.addProperty("success", false);
+				res.addProperty("errorMsg", "There has been a problem accessing the database. Please try again later.");
 			}
 			
-		} catch (SQLException ex) {
-			res.addProperty("error", ex.getMessage());
-		} finally {
-			ConnectionManager.close(connection, queryPstmt, rs);
+		}catch (SQLException ex) {
+			res.addProperty("errorMsg", "There has been a problem accessing the database. Please try again later.");
+			res.addProperty("error",  ex.getMessage());
 		}
-		
-		//return res.toString();
+		return res.toString();
 	}
+	
 }

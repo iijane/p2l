@@ -3,6 +3,7 @@ package servlet;
 import java.io.IOException;
 import java.io.PrintWriter;
 
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -14,9 +15,11 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonElement;
 import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
+import com.sun.jersey.api.representation.Form;
 
 import database.ConnectionManager;
 
@@ -49,7 +52,10 @@ public class CreatePetServlet extends HttpServlet {
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// TODO Auto-generated method stub
+		
+		HttpSession session = request.getSession();
+		String username = (String) session.getAttribute("username");
+		
 		String name = (String) request.getParameter("name");
 		String tag = (String) request.getParameter("tag");
 		String gender = (String) request.getParameter("gender");
@@ -59,32 +65,36 @@ public class CreatePetServlet extends HttpServlet {
 		String description = (String) request.getParameter("description");
 		PrintWriter out = response.getWriter();
 		
-		//HttpSession session = request.getSession();
-		//String username = (String) session.getAttribute("username");
-		String username = "al.pang@me.com";
+		Form form = new Form();
+	    form.add("name", name);
+	    form.add("user_id", username);
+	    form.add("tag", tag);
+	    form.add("gender", gender);
+	    form.add("breed", breed);
+	    form.add("dob", dob);
+	    form.add("country", country);
+	    form.add("description", description);
 		
 		ClientConfig config = new DefaultClientConfig();
-	    Client client = Client.create(config);
-	    WebResource service = client.resource(ConnectionManager.getBaseURI());
-	    
-	    String jsonString = service.path("rest").path("UserManager").path("retrieveUserIdByEmail").queryParam("email", username).accept(MediaType.APPLICATION_JSON).get(String.class);
-	    JsonObject json = new Gson().fromJson(jsonString, JsonObject.class);
-	    String userId = json.get("user_id").getAsString();
-	    
-	    JsonObject pet = new JsonObject();
-	    pet.addProperty("user_id", userId);
-	    pet.addProperty("pet_name", name);
-	    pet.addProperty("tag_id", tag);
-	    pet.addProperty("gender", gender);
-	    pet.addProperty("breed", breed);
-	    pet.addProperty("dob", dob);
-	    pet.addProperty("country", country);
-	    pet.addProperty("description", description);
-	    
-	    String resString = service.path("rest").path("PetManager").accept(MediaType.APPLICATION_JSON).put(String.class, pet);
-	    JsonObject res = new Gson().fromJson(resString, JsonObject.class);
-	    
-	    out.println(resString);
+		Client client = Client.create(config);
+		WebResource service = client.resource(ConnectionManager.getBaseURI());
+		
+		ClientResponse clientResp = service.path("rest").path("PetController").path("createpet").type(MediaType.APPLICATION_FORM_URLENCODED)
+				.post(ClientResponse.class, form);
+		
+		String jsonString = clientResp.getEntity(String.class);
+		JsonObject jsonObject = new Gson().fromJson(jsonString, JsonObject.class);
+
+		if(jsonObject.has("errorMsg")){
+			RequestDispatcher dispatcher = request.getRequestDispatcher("createpet.jsp");
+			request.setAttribute("errorMsg", jsonObject.get("errorMsg").getAsString());
+			request.setAttribute("inputs", jsonObject.get("inputs").getAsJsonObject());
+			dispatcher.forward(request, response);
+			return;
+		} else {
+			response.sendRedirect("createpet.jsp?regsuccess=true");
+		}
+		
 	}
 
 }

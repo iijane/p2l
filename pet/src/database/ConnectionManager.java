@@ -9,88 +9,131 @@ import javax.ws.rs.core.UriBuilder;
 import java.net.URI;
 
 /**
- * A class that manages connections to the database. It also
- * has a utility method that close connections, statements and
- * resultsets
+ * A class that manages connections to the database. It also has a utility
+ * method that close connections, statements and resultsets
  */
 public class ConnectionManager {
-    private static String JDBC_DRIVER = "jdbc.driver";
-    private static String JDBC_URL = "jdbc.url";
-    private static String JDBC_USER = "jdbc.user";
-    private static String JDBC_PASSWORD = "jdbc.password";
-    private static String WEBSERVICE_URL = "webservice.url";
-    private static Properties props = new Properties();
-    private static Properties web_props = new Properties();
+	private static String JDBC_DRIVER = "jdbc.driver";
+	private static String JDBC_URL = "jdbc.url";
+	private static String JDBC_USER = "jdbc.user";
+	private static String JDBC_PASSWORD = "jdbc.password";
+	private static String WEBSERVICE_URL = "webservice.url";
+	private static Properties props = new Properties();
+	private static Properties web_props = new Properties();
 
-    static {
-        try {
-            InputStream is = ConnectionManager.class.getResourceAsStream("connection.properties");
-            props.load(is);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        try {
-            Class.forName(props.getProperty(JDBC_DRIVER)).newInstance();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        try {
-            InputStream is = ConnectionManager.class.getResourceAsStream("webservice.properties");
-            web_props.load(is);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+	static {
+		try {
+			InputStream is = ConnectionManager.class
+					.getResourceAsStream("connection.properties");
+			props.load(is);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		try {
+			Class.forName(props.getProperty(JDBC_DRIVER)).newInstance();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		try {
+			InputStream is = ConnectionManager.class
+					.getResourceAsStream("webservice.properties");
+			web_props.load(is);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 
-    /**
-     * Gets a connection to the database
-     *
-     * @return the connection
-     * @throws SQLException if an error occurs when connecting
-     */
-    public static Connection getConnection() throws SQLException {
-        return DriverManager.getConnection(props.getProperty(JDBC_URL),
-                props.getProperty(JDBC_USER),
-                props.getProperty(JDBC_PASSWORD));
-    }
+	/**
+	 * Gets a connection to the database
+	 * 
+	 * @return the connection
+	 * @throws SQLException
+	 *             if an error occurs when connecting
+	 */
+	public static Connection getConnection() throws SQLException {
+		return DriverManager.getConnection(props.getProperty(JDBC_URL),
+				props.getProperty(JDBC_USER), props.getProperty(JDBC_PASSWORD));
+	}
 
-    /**
-     * close the given connection, statement and resultset
-     *
-     * @param conn the connection object to be closed
-     * @param stmt the statement object to be closed
-     * @param rs   the resultset object to be closed
-     */
-    public static void close(Connection conn, PreparedStatement stmt, ResultSet rs) {
-        try {
-            if (rs != null) {
-                rs.close();
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        try {
-            if (stmt != null) {
-                stmt.close();
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        try {
-            if (conn != null) {
-                conn.close();
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
+	public static void beginTransaction(Connection dbCon) throws SQLException {
+		dbCon.setAutoCommit(false);
+	}
 
-    public static URI getBaseURI() {
-	    return UriBuilder.fromUri(web_props.getProperty(WEBSERVICE_URL)).build();
-	  }
-    
-    public static void main(String[] args) throws Exception {
-        System.out.println(ConnectionManager.getConnection());
+	public static void commitTransaction(Connection dbCon) throws SQLException {
+		dbCon.commit();
+	}
 
-    }
+	public static void rollback(Connection dbCon) throws SQLException {
+		dbCon.rollback();
+	}
+
+	public static Savepoint setSavePoint(Connection dbCon) throws SQLException {
+		try {
+			return dbCon.setSavepoint();
+		} catch (SQLException ex) {
+			return null;
+		}
+	}
+
+	public static void releaseSavePoint(Connection dbCon, Savepoint savepoint)
+			throws SQLException {
+		dbCon.releaseSavepoint(savepoint);
+	}
+
+	public static void rollback(Connection dbCon, Savepoint savepoint)
+			throws SQLException {
+		dbCon.rollback(savepoint);
+	}
+
+	public static void closeConnection(Connection dbCon) throws SQLException {
+		if (dbCon != null && !dbCon.isClosed()) {
+			dbCon.setAutoCommit(true);
+			dbCon.close();
+		}
+	}
+
+	/**
+	 * close the given connection, statement and resultset
+	 * 
+	 * @param conn
+	 *            the connection object to be closed
+	 * @param stmt
+	 *            the statement object to be closed
+	 * @param rs
+	 *            the resultset object to be closed
+	 */
+	public static void close(Connection conn, PreparedStatement stmt,
+			ResultSet rs) {
+		try {
+			if (rs != null) {
+				rs.close();
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		try {
+			if (stmt != null) {
+				stmt.close();
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		try {
+			if (conn != null) {
+				conn.close();
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static URI getBaseURI() {
+		return UriBuilder.fromUri(web_props.getProperty(WEBSERVICE_URL))
+				.build();
+	}
+
+	public static void main(String[] args) throws Exception {
+		System.out.println(ConnectionManager.getConnection());
+
+	}
 }
